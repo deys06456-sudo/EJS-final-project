@@ -1,0 +1,23 @@
+{
+  "name": "nodejs-class",
+  "version": "1.0.0",
+  "description": "create a nodejs app",
+  "license": "ISC",
+  "author": "webskitters",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cloudinary": "^2.11.0",
+    "dotenv": "^18.0.9",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "mongoose": "^9.11.4",
+    "multer": "^2.5.0",
+    "nodemon": "^3.1.14"
+  }
+}

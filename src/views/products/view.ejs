@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0">Product Details</h3>
+        </div>
+
+        <div class="card-body">
+            <h4><%= product.name %></h4>
+            <hr>
+
+            <p><strong>Description:</strong> <%= product.description %></p>
+            <p><strong>Price:</strong> ₹<%= product.price %></p>
+            <p><strong>Discount Price:</strong> ₹<%= product.discountPrice ?? 'N/A' %></p>
+
+            <p>
+                <strong>Category:</strong>
+                <%= product.category && product.category.name ? product.category.name : 'N/A' %>
+            </p>
+
+            <p>
+                <strong>Brand / Company:</strong>
+                <%= product.brand && product.brand.name ? product.brand.name : 'N/A' %>
+            </p>
+
+            <p>
+                <strong>Sizes:</strong>
+                <%= product.sizes && product.sizes.length ? product.sizes.join(', ') : 'N/A' %>
+            </p>
+
+            <p>
+                <strong>Colors:</strong>
+                <%= product.colors && product.colors.length ? product.colors.join(', ') : 'N/A' %>
+            </p>
+
+            <p><strong>Stock:</strong> <%= product.stock %></p>
+
+            <h5 class="mt-4">Product Images</h5>
+
+            <div class="row">
+                <% if (product.images && product.images.length) { %>
+                    <% product.images.forEach(image => { %>
+                        <div class="col-6 col-md-3 mb-3">
+                            <img src="<%= typeof image === 'string' ? image : image.url %>"
+                                alt="<%= product.name %>"
+                                class="img-fluid img-thumbnail"
+                                style="width:100%;height:200px;object-fit:cover;">
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-muted">No images available.</p>
+                <% } %>
+            </div>
+
+            <a href="/products/edit/<%= product._id %>" class="btn btn-warning">Edit</a>
+            <a href="/products" class="btn btn-secondary">Back to Products</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

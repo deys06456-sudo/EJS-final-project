@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #fff;
+            color: #212529;
+        }
+
+        .filter-sidebar {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .filter-sidebar h4 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .filter-sidebar hr {
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+
+        .topbar {
+            background: #f8f9fa;
+            min-height: 100px;
+        }
+
+        /* Search input and button stay on one line */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 370px;
+            flex-wrap: nowrap;
+        }
+
+        .search-bar input {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .search-bar button {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .product-img,
+        .no-image {
+            height: 280px;
+            width: 100%;
+        }
+
+        .product-img {
+            object-fit: cover;
+            background: #f1f1f1;
+        }
+
+        .no-image {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .product-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-description {
+            min-height: 45px;
+            overflow-wrap: anywhere;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(0, 0, 0, 0.55);
+            border-radius: 5px;
+        }
+
+        @media (max-width: 767px) {
+            .filter-sidebar {
+                min-height: auto;
+            }
+
+            .topbar {
+                align-items: flex-start !important;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<%
+    const sizes = typeof sizeOptions !== "undefined"
+        ? sizeOptions
+        : ["S", "M", "L", "XL"];
+
+    const colors = typeof colorOptions !== "undefined"
+        ? colorOptions
+        : ["Black", "Blue", "Grey", "Light blue", "Red", "Steel", "White"];
+
+    const selectedSizes = typeof selSizes !== "undefined" ? selSizes : [];
+    const selectedColors = typeof selColors !== "undefined" ? selColors : [];
+    const selectedCategories = typeof selCategories !== "undefined" ? selCategories : [];
+    const selectedBrands = typeof selBrands !== "undefined" ? selBrands : [];
+
+    const query = typeof q !== "undefined" ? q : {};
+    const categoryList = typeof categories !== "undefined" ? categories : [];
+    const brandList = typeof brands !== "undefined" ? brands : [];
+    const productList = typeof products !== "undefined" ? products : [];
+
+    const selected = (values, value) =>
+        Array.isArray(values) &&
+        values.map(String).includes(String(value));
+%>
+
+<!-- Main GET form: filters and search use this form -->
+<form id="filterForm" action="/products" method="GET"></form>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- FILTER SIDEBAR -->
+        <aside class="col-md-3 col-lg-2 filter-sidebar p-4">
+
+            <h3 class="mb-4">Product Filter</h3>
+
+            <!-- SIZE -->
+            <h4>Size</h4>
+            <hr>
+
+            <div class="mb-4">
+                <% sizes.forEach(size => { %>
+                    <div class="form-check">
+                        <input
+                            class="form-check-input filter-check"
+                            type="checkbox"
+                            data-group="size"
+                            value="<%= size %>"
+                            id="size-<%= size %>"
+                            <%= selected(selectedSizes, size) ? "checked" : "" %>
+                        >
+                        <label class="form-check-label" for="size-<%= size %>">
+                            <%= size %>
+                        </label>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- COLOR -->
+            <h4>Color</h4>
+            <hr>
+
+            <div class="mb-4">
+                <% colors.forEach((color, index) => { %>
+                    <div class="form-check">
+                        <input
+                            class="form-check-input filter-check"
+                            type="checkbox"
+                            data-group="color"
+                            value="<%= color %>"
+                            id="color-<%= index %>"
+                            <%= selected(selectedColors, color) ? "checked" : "" %>
+                        >
+                        <label class="form-check-label" for="color-<%= index %>">
+                            <%= color %>
+                        </label>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- CATEGORY -->
+            <% if (categoryList.length > 0) { %>
+                <h4>Category</h4>
+                <hr>
+
+                <div class="mb-4">
+                    <% categoryList.forEach(category => { %>
+                        <div class="form-check">
+                            <input
+                                class="form-check-input filter-check"
+                                type="checkbox"
+                                data-group="category"
+                                value="<%= category._id %>"
+                                id="category-<%= category._id %>"
+                                <%= selected(selectedCategories, category._id) ? "checked" : "" %>
+                            >
+                            <label
+                                class="form-check-label"
+                                for="category-<%= category._id %>"
+                            >
+                                <%= category.name %>
+                            </label>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <!-- BRAND -->
+            <% if (brandList.length > 0) { %>
+                <h4>Brand</h4>
+                <hr>
+
+                <div class="mb-4">
+                    <% brandList.forEach(brand => { %>
+                        <div class="form-check">
+                            <input
+                                class="form-check-input filter-check"
+                                type="checkbox"
+                                data-group="brand"
+                                value="<%= brand._id %>"
+                                id="brand-<%= brand._id %>"
+                                <%= selected(selectedBrands, brand._id) ? "checked" : "" %>
+                            >
+                            <label
+                                class="form-check-label"
+                                for="brand-<%= brand._id %>"
+                            >
+                                <%= brand.name %>
+                            </label>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <!-- PRICE -->
+            <h4>Price</h4>
+            <hr>
+
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <input
+                        type="number"
+                        name="minPrice"
+                        form="filterForm"
+                        class="form-control"
+                        placeholder="Min"
+                        min="0"
+                        value="<%= query.minPrice || '' %>"
+                    >
+                </div>
+
+                <div class="col-6">
+                    <input
+                        type="number"
+                        name="maxPrice"
+                        form="filterForm"
+                        class="form-control"
+                        placeholder="Max"
+                        min="0"
+                        value="<%= query.maxPrice || '' %>"
+                    >
+                </div>
+            </div>
+
+            <!-- SORT -->
+            <h4>Sort By</h4>
+            <hr>
+
+            <select name="sort" form="filterForm" class="form-select mb-4">
+                <option value="" <%= !query.sort ? "selected" : "" %>>
+                    Newest First
+                </option>
+
+                <option value="price_low" <%= query.sort === "price_low" ? "selected" : "" %>>
+                    Price: Low to High
+                </option>
+
+                <option value="price_high" <%= query.sort === "price_high" ? "selected" : "" %>>
+                    Price: High to Low
+                </option>
+
+                <option value="oldest" <%= query.sort === "oldest" ? "selected" : "" %>>
+                    Oldest First
+                </option>
+
+                <option value="name_asc" <%= query.sort === "name_asc" ? "selected" : "" %>>
+                    Name: A to Z
+                </option>
+
+                <option value="name_desc" <%= query.sort === "name_desc" ? "selected" : "" %>>
+                    Name: Z to A
+                </option>
+            </select>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" form="filterForm" class="btn btn-dark">
+                    Apply Filter
+                </button>
+
+                <a href="/products" class="btn btn-outline-secondary">
+                    Clear
+                </a>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="col-md-9 col-lg-10 p-0">
+
+            <!-- TOPBAR -->
+            <div class="topbar d-flex justify-content-between align-items-center gap-3 px-4 py-3">
+
+                <h5 class="mb-0">Home / Products</h5>
+
+                <!-- SEARCH: input and button in one row -->
+                <div class="search-bar">
+                    <input
+                        type="text"
+                        name="search"
+                        form="filterForm"
+                        class="form-control"
+                        placeholder="Search product name..."
+                        value="<%= query.search || '' %>"
+                    >
+
+                    <button
+                        type="submit"
+                        form="filterForm"
+                        class="btn btn-outline-success"
+                    >
+                        Search
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="px-4 py-4">
+
+                <h1 class="fw-bold">All Products</h1>
+
+                <div class="d-flex flex-wrap gap-2 my-4">
+                    <a href="/products/create" class="btn btn-primary">
+                        + Add Product
+                    </a>
+
+                    <a href="/products/recycle-bin" class="btn btn-outline-secondary">
+                        Recycle Bin
+                    </a>
+                </div>
+
+                <!-- PRODUCT LIST -->
+                <% if (productList.length === 0) { %>
+
+                    <div class="alert alert-info">
+                        No products found. Try changing your filters or add a new product.
+                    </div>
+
+                <% } else { %>
+
+                    <div class="row g-4">
+
+                        <% productList.forEach(product => { %>
+
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="card product-card h-100">
+
+                                    <!-- MULTIPLE PRODUCT IMAGES -->
+                                    <% if (product.images && product.images.length > 0) { %>
+
+                                        <div
+                                            id="carousel-<%= product._id %>"
+                                            class="carousel slide"
+                                            data-bs-ride="false"
+                                        >
+                                            <div class="carousel-inner">
+
+                                                <% product.images.forEach((img, index) => { %>
+                                                    <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                        <img
+                                                            src="<%= typeof img === 'string' ? img : img.url %>"
+                                                            class="product-img"
+                                                            alt="<%= (typeof img === 'object' && img.alt) ? img.alt : product.name %>"
+                                                        >
+                                                    </div>
+                                                <% }) %>
+
+                                            </div>
+
+                                            <% if (product.images.length > 1) { %>
+                                                <button
+                                                    class="carousel-control-prev"
+                                                    type="button"
+                                                    data-bs-target="#carousel-<%= product._id %>"
+                                                    data-bs-slide="prev"
+                                                >
+                                                    <span class="carousel-control-prev-icon"></span>
+                                                    <span class="visually-hidden">Previous</span>
+                                                </button>
+
+                                                <button
+                                                    class="carousel-control-next"
+                                                    type="button"
+                                                    data-bs-target="#carousel-<%= product._id %>"
+                                                    data-bs-slide="next"
+                                                >
+                                                    <span class="carousel-control-next-icon"></span>
+                                                    <span class="visually-hidden">Next</span>
+                                                </button>
+                                            <% } %>
+                                        </div>
+
+                                    <% } else { %>
+
+                                        <div class="no-image d-flex align-items-center justify-content-center">
+                                            No Image Available
+                                        </div>
+
+                                    <% } %>
+
+                                    <!-- NAME AND DESCRIPTION -->
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <%= product.name %>
+                                        </h5>
+
+                                        <p class="card-text product-description">
+                                            <%= product.description || "No description available." %>
+                                        </p>
+                                    </div>
+
+                                    <!-- DETAILS -->
+                                    <ul class="list-group list-group-flush">
+
+                                        <li class="list-group-item">
+                                            <strong>Price:</strong>
+                                            ₹<%= product.price %>
+
+                                            <% if (product.discountPrice != null && product.discountPrice !== "") { %>
+                                                <span class="text-success ms-2">
+                                                    Discount: ₹<%= product.discountPrice %>
+                                                </span>
+                                            <% } %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Size:</strong>
+                                            <%= product.sizes && product.sizes.length
+                                                ? product.sizes.join(", ")
+                                                : "N/A" %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Color:</strong>
+                                            <%= product.colors && product.colors.length
+                                                ? product.colors.join(", ")
+                                                : "N/A" %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Brand:</strong>
+                                            <%= product.brand && product.brand.name
+                                                ? product.brand.name
+                                                : "N/A" %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Category:</strong>
+                                            <%= product.category && product.category.name
+                                                ? product.category.name
+                                                : "N/A" %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Stock:</strong>
+                                            <%= product.stock ?? 0 %>
+                                        </li>
+
+                                        <li class="list-group-item">
+                                            <strong>Status:</strong>
+                                            <span class="badge <%= product.status === 'active' ? 'text-bg-success' : 'text-bg-secondary' %>">
+                                                <%= product.status || "N/A" %>
+                                            </span>
+                                        </li>
+
+                                    </ul>
+
+                                    <!-- ACTIONS -->
+                                    <div class="card-body d-flex flex-wrap gap-2">
+
+                                        <a
+                                            href="/products/view/<%= product._id %>"
+                                            class="btn btn-info text-white"
+                                        >
+                                            View
+                                        </a>
+
+                                        <a
+                                            href="/products/edit/<%= product._id %>"
+                                            class="btn btn-success"
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <form
+                                            action="/products/delete/<%= product._id %>"
+                                            method="POST"
+                                            onsubmit="return confirm('Move this product to the recycle bin?');"
+                                        >
+                                            <button type="submit" class="btn btn-warning">
+                                                Delete
+                                            </button>
+                                        </form>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        <% }) %>
+
+                    </div>
+
+                <% } %>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById("filterForm").addEventListener("submit", function () {
+        const form = this;
+
+        // Remove hidden inputs generated by a previous submission.
+        form.querySelectorAll("[data-generated='true']").forEach(input => {
+            input.remove();
+        });
+
+        // Collect selected checkbox filters.
+        const groups = {};
+
+        document.querySelectorAll(".filter-check:checked").forEach(checkbox => {
+            const group = checkbox.dataset.group;
+
+            if (!groups[group]) {
+                groups[group] = [];
+            }
+
+            groups[group].push(checkbox.value);
+        });
+
+        // Send multiple selected values as comma-separated strings.
+        Object.keys(groups).forEach(group => {
+            const hiddenInput = document.createElement("input");
+
+            hiddenInput.type = "hidden";
+            hiddenInput.name = group;
+            hiddenInput.value = groups[group].join(",");
+            hiddenInput.setAttribute("data-generated", "true");
+
+            form.appendChild(hiddenInput);
+        });
+    });
+</script>
+
+</body>
+</html>
+
+where is this part
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= typeof title !== "undefined" ? title : "Product Management" %></title>
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            background: #ffffff;
+            color: #212529;
+        }
+
+        .main-navbar {
+            background: #212529;
+        }
+
+        .main-navbar .navbar-brand {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .main-navbar .nav-link {
+            color: #ffffff;
+        }
+
+        .main-navbar .nav-link:hover {
+            color: #ffc107;
+        }
+    </style>
+</head>
+
+<body>

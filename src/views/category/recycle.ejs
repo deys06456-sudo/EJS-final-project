@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Recycle Bin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Category Recycle Bin</h2>
+        <a href="/categories" class="btn btn-secondary">Back to Categories</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>SL No.</th>
+                    <th>Category Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (categories && categories.length > 0) { %>
+                    <% categories.forEach((category, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= category.name %></td>
+                            <td><%= category.description %></td>
+                            <td><%= category.status %></td>
+                            <td>
+                                <a href="/categories/restore/<%= category._id %>"
+                                   class="btn btn-success btn-sm"
+                                   onclick="return confirm('Restore this category?')">
+                                    Restore
+                                </a>
+
+                                <a href="/categories/permanent-delete/<%= category._id %>"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Permanently delete this category? This cannot be undone.')">
+                                    Permanent Delete
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" class="text-center">Recycle bin is empty.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>
